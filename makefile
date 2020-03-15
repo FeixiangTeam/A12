@@ -3,17 +3,15 @@ BIN=${HOME}/bin
 INCL=${HOME}/incl
 SRC=${HOME}/src
 CC=g++-9
-ALL=main.o
 
-VPATH=${SRC}
+VPATH=${SRC}:${SRC}/GA
 
 .cpp.o:
 	${CC} -c $< -I ${INCL} -std=c++17 -Wall
 .o:
 	${CC} $^ -o ${BIN}/$@
-	-rm -f *.o
 
-main: ${ALL}
+bruteforce: main.o data.o bruteforce.o
 
 test: test.o
 	${CC} $^ -o ${BIN}/$@
