@@ -94,6 +94,6 @@
 		{ "from": "8", "to": "8", "dis": 0 }
 	],
 	"truck_set": [
-		{ "limit": 8, "cost": 0 }
+		{ "limit": 8, "cost": 0, "num": 5 }
 	]
 }

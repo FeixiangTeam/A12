@@ -6,9 +6,9 @@ using json=nlohmann::json;
 #include <map>
 #include <string>
 #include <vector>
-#include <utility>
 
-const size_t MAX_VERTEX_NUM=50;
+const size_t MAX_VERTEX_NUM=100;
+const size_t MAX_TARGET_NUM=50;
 
 extern json data;
 extern std::map<std::string, int> vertex;

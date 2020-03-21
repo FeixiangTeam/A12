@@ -1,24 +1,34 @@
 #ifndef DEFINE_HPP
 #define DEFINE_HPP
 
+#include "data.hpp"
 #include "GA/config.hpp"
+#include <random>
+#include <vector>
+
+extern std::random_device rd;
+extern std::mt19937 rand_engine;
 
 bool Random(double pr);
 
+extern int total_truck_num;
+
+void GAInit();
+
 struct Individual {
-	int next[MAXN];
-	int num_truck;
+	int next[MAX_TARGET_NUM+1];
+	int truck_num;
 	double fitness;
 	Individual() =default;
 	bool Calc();
 };
 
-void IndividualInit(vector<Individual> &tag, int n);
+std::vector<Individual> IndividualInit(size_t num);
 
-void Cross(Individual a, Individual b, vector<Individual> &tag);
+void Cross(Individual a, Individual b, std::vector<Individual> &dst);
 
-void Mutation(Individual x, vector<Individual> &tag);
+void Mutation(Individual x, std::vector<Individual> &dst);
 
-void Select(vector<Individual> &tag, int n);
+void Select(std::vector<Individual> &dst, int n);
 
 #endif
