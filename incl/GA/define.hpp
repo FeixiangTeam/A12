@@ -2,7 +2,6 @@
 #define DEFINE_HPP
 
 #include "data.hpp"
-#include "GA/config.hpp"
 #include <random>
 #include <vector>
 
@@ -25,10 +24,10 @@ struct Individual {
 
 std::vector<Individual> IndividualInit(size_t num);
 
+void Select(std::vector<Individual> &dst, size_t num);
+
 void Cross(Individual a, Individual b, std::vector<Individual> &dst);
 
 void Mutation(Individual x, std::vector<Individual> &dst);
-
-void Select(std::vector<Individual> &dst, int n);
 
 #endif

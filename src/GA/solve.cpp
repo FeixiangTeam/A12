@@ -3,7 +3,7 @@
 #include <vector>
 #include <utility>
 
-std::vector<Individual> u, v, w;
+static std::vector<Individual> u, v, w;
 
 void Solve() {
 	GAInit();

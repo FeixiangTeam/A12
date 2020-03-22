@@ -21,7 +21,7 @@ namespace Map {
 
 	void Init();
 	double CalcPathDistance(const std::vector<int> &path);
-	void PathPrint(std::vector<int> &path, int x, int y);
+	void PathPrint(std::vector<int> &res, int x, int y);
 }
 
 namespace Answer {
