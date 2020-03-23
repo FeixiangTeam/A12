@@ -1,5 +1,5 @@
-#include "GA/config.hpp"
 #include "GA/define.hpp"
+#include "GA/config.hpp"
 #include <vector>
 #include <utility>
 
@@ -11,8 +11,8 @@ void Solve() {
 	for(int k=0; k<TIMES; ++k) {
 		Select(u, POPULATION);
 		v.clear();
-		for(int i=0; i<u.size(); ++i)
-			for(int j=0; j<u.size(); ++j)
+		for(size_t i=0; i<u.size(); ++i)
+			for(size_t j=0; j<u.size(); ++j)
 				if(i!=j && Random(PR_CROSS))
 					Cross(u[i], u[j], v);
 		w.clear();

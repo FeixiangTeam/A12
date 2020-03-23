@@ -19,3 +19,7 @@ void GAInit() {
 		}
 	}
 }
+
+Individual::Individual() {
+	memset(next, 0x00, sizeof(next));
+}

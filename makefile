@@ -13,7 +13,7 @@ VPATH=${SRC}:${SRC}/GA
 
 bruteforce: main.o data.o bruteforce.o
 
-test: test.o
+test: test.o main.o data.o GA_init.o individual_init.o cross.o
 	${CC} $^ -o ${BIN}/$@
 	-rm -f *.o
 	@echo ------------

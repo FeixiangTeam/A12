@@ -18,7 +18,7 @@ struct Individual {
 	int next[MAX_TARGET_NUM+1];
 	int truck_num;
 	double fitness;
-	Individual() =default;
+	Individual();
 	bool Calc();
 };
 
@@ -26,7 +26,7 @@ std::vector<Individual> IndividualInit(size_t num);
 
 void Select(std::vector<Individual> &dst, size_t num);
 
-void Cross(Individual a, Individual b, std::vector<Individual> &dst);
+void Cross(const Individual &a, const Individual &b, std::vector<Individual> &dst);
 
 void Mutation(Individual x, std::vector<Individual> &dst);
 

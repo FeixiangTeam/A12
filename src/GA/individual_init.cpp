@@ -1,5 +1,5 @@
-#include "data.hpp"
 #include "GA/define.hpp"
+#include "data.hpp"
 #include <algorithm>
 
 static int idx[MAX_TARGET_NUM+1];
@@ -8,9 +8,9 @@ static int pre[MAX_TARGET_NUM+1];
 
 std::vector<Individual> IndividualInit(size_t num) {
 	std::vector<Individual> res(num);
-	int tv_num=data["target_vertex_set"].size();
+	static int tv_num=data["target_vertex_set"].size();
 
-	std::uniform_int_distribution<int> truck_num_gen(std::max(total_truck_num-3, 1), total_truck_num);
+	static std::uniform_int_distribution<int> truck_num_gen(std::max(total_truck_num-3, 1), total_truck_num);
 	for(int i=1; i<=tv_num; ++i) idx[i]=i;
 	for(size_t i=0; i<num; ++i) {
 		Individual &now=res[i];
