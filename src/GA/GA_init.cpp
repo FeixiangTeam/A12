@@ -1,7 +1,7 @@
+#include "GA/define.hpp"
 #include "data.hpp"
 #include "GA/config.hpp"
-#include "GA/define.hpp"
-#include <stdexcept>
+#include <cstring>
 
 std::random_device rd;
 std::mt19937 rand_engine(rd());
@@ -21,5 +21,5 @@ void GAInit() {
 }
 
 Individual::Individual() {
-	memset(next, 0x00, sizeof(next));
+	std::memset(next, 0x00, sizeof(next));
 }

@@ -16,7 +16,7 @@ void Solve() {
 				if(i!=j && Random(PR_CROSS))
 					Cross(u[i], u[j], v);
 		w.clear();
-		for(Individual &&x: v)
+		for(Individual &x: v)
 			if(Random(PR_MUTATION))
 				Mutation(x, w);
 			else
