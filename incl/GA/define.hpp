@@ -18,6 +18,8 @@ struct Individual {
 	int next[MAX_TARGET_NUM+1];
 	int truck_num;
 	double fitness;
+	double gaiLv;
+	double sumFitness;
 	Individual();
 	bool Calc()
 	{
