@@ -20,6 +20,7 @@ double f[1 << MAXN];
 int p[1 << MAXN];
 
 struct Truck {
+	std::size_t id;
 	double limit, cost;
 	operator double() { return limit; }
 };
@@ -58,8 +59,9 @@ void Solve() {
 						}
 			}
 
-	for(const auto &truck: data["truck_set"])
-		trucks.push_back({truck["limit"], truck["cost"]});
+	const auto &truck_set = data["truck_set"];
+	for(std::size_t i = 0; i < truck_set.size(); ++i)
+		trucks.push_back({i, truck_set[i]["limit"], truck_set[i]["cost"]});
 	std::sort(trucks.begin(), trucks.end(), [](const Truck &a, const Truck &b) { return a.cost<b.cost; });
 	std::size_t n = 0;
 	for(std::size_t i = 1; i < trucks.size(); ++i)
@@ -84,12 +86,21 @@ void Solve() {
 	int i = (1 << num) - 1;
 	while(i > 0) {
 		int j = p[i]; i ^= j;
+		double w = weight[j];
+		std::size_t t = std::lower_bound(trucks.begin(), trucks.end(), w)->id;
 		std::vector<int> res;
 		int k = start_by[j];
 		while(j > 0) {
 			res.push_back(k + 1);
 			std::tie(j, k)=std::tuple(j ^ (1 << k), from[j][k]);
 		}
-		Answer::AddPath(std::move(res));
+		answer.push_back({
+			{"full_path", Map::GetNamedPath(Map::GetFullPath(res))},
+			{"target_path", Map::GetNamedPath(res)},
+			{"distance", Map::CalcPathDistance(res)},
+			{"weight", w},
+			{"truck", data["truck_set"][t]["name"]},
+			{"ratio", w / data["truck_set"][t]["limit"].get<double>()}
+		});
 	}
 }

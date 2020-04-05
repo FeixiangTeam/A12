@@ -4,32 +4,27 @@
 #include "json.hpp"
 using json = nlohmann::json;
 #include <cstddef>
-#include <map>
-#include <string>
 #include <vector>
+#include <string>
 
 constexpr std::size_t MAX_VERTEX_NUM = 100;
 constexpr std::size_t MAX_TARGET_NUM = 50;
 
 extern json data;
-extern std::map<std::string, int> vertex;
 
 void DataInit(const char *input);
 
 namespace Map {
 	extern double dis[MAX_VERTEX_NUM][MAX_VERTEX_NUM];
-	extern int path[MAX_VERTEX_NUM][MAX_VERTEX_NUM];
 
 	void Init();
 	double CalcPathDistance(const std::vector<int> &path);
-	void PathPrint(std::vector<int> &res, int x, int y);
+	std::vector<std::string> GetNamedPath(const std::vector<int> &path);
+	std::vector<int> GetFullPath(const std::vector<int> &target_path);
 }
 
-namespace Answer {
-	extern json result;
+extern json answer;
 
-	void AddPath(std::vector<int> target_path);
-	void Output();
-}
+void AnswerOutput();
 
 #endif

@@ -1,14 +1,14 @@
 {
 	"start_vertex": "0",
 	"target_vertex_set": [
-		{ "id": "1", "target": 2 },
-		{ "id": "2", "target": 1.5 },
-		{ "id": "3", "target": 4.5 },
-		{ "id": "4", "target": 3 },
-		{ "id": "5", "target": 1.5 },
-		{ "id": "6", "target": 4 },
-		{ "id": "7", "target": 2.5 },
-		{ "id": "8", "target": 3 }
+		{ "name": "1", "target": 2 },
+		{ "name": "2", "target": 1.5 },
+		{ "name": "3", "target": 4.5 },
+		{ "name": "4", "target": 3 },
+		{ "name": "5", "target": 1.5 },
+		{ "name": "6", "target": 4 },
+		{ "name": "7", "target": 2.5 },
+		{ "name": "8", "target": 3 }
 	],
 	"edge_set": [
 		{ "from": "0", "to": "0", "dis": 0 },
@@ -94,6 +94,6 @@
 		{ "from": "8", "to": "8", "dis": 0 }
 	],
 	"truck_set": [
-		{ "limit": 8, "cost": 0, "num": 5 }
+		{ "name": "中型车", "limit": 8, "cost": 0, "num": 5 }
 	]
 }

@@ -10,6 +10,6 @@ int main(int argc, const char *argv[]) {
 	}
 	DataInit(argv[1]);
 	Solve();
-	Answer::Output();
+	AnswerOutput();
 	return 0;
 }
