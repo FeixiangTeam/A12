@@ -1,47 +1,46 @@
-#include "define.hpp"
-#include <cstring>
+#include "GA/define.hpp"
 #include <algorithm>
 #include <cmath>
 
-using namespace std;
-const double dec_rate=0.90; //模拟退火系数，即降温率
-const int max_rand=100000; //产生的随机数上限
-const double eps=1e-4; //浮点数精度
-const double T0=100000; //初始温度
-const double T_min=1e-4; //临界温度
+const double dec_rate=0.90; // the rate of temperature reduction(per operation)
+const int max_rand=100000; // the upper bound of the generated random Numbers
+const double eps=1e-4; // floating point precision
+const double T0=100000; // initial temperature
+const double T_min=1e-4; // critical temperature
 
-double T; //实时温度
-int siz; //种群大小（个体数目）
-vector<Individual> sel_gen; //最终选择的个体组成的种群
+double T; // real-time temperature
+int siz; // population size (number of individuals)
+std::vector<Individual> sel_gen; // the population of ultimately selected individuals
 
-bool accept(Individual old_g,Individual new_g,double Temp) //可接受函数，为真则接受新一代种群的个体
+bool accept(Individual old_g,Individual new_g,double Temp) // the function will return true if accept the new generation of individual
 {
-	double f_new=caculaFitness(new_g),f_old=caculaFitness(old_g); //f_val()为返回适应值的函数
-	if(f_new<f_old) return true; //更优，直接接受
-	int posb=rd()%max_rand; //随机出一个值
-	int val=(int)(1.0/(1.0+exp(-(f_new-f_old)/Temp))*max_rand); //判断是否接受
+	double f_new=new_g.fitness,f_old=old_g.fitness; // get fitness
+	if(f_new<f_old) return true; //better, directly accept
+	int posb=rand()%max_rand; // pick a random number
+	int val=(int)(1.0/(1.0+exp(-(f_new-f_old)/Temp))*max_rand); // judge if it's acceptable
 	return posb<=val;
 }
 
-vector<Individual> sel_SA(vector<Individual> &old_gen,vector<Individual> &new_gen) //传入上一代种群、新一代种群
+std::vector<Individual> sel_SA(std::vector<Individual> &old_gen,std::vector<Individual> &new_gen) // push previous and new generation population
 {
-	sel_gen.clear(); //初始化答案数组
-	siz=old_gen.size(); //获取种群大小
+	sel_gen.clear(); // initialize the answer array
+	siz=old_gen.size(); // get population size
 	for(int i=0;i<siz;i++)
 	{
 		Individual old_g=old_gen[i],new_g=new_gen[i];
-		Individual better_indiv=old_g; //先选择上一代种群的个体
-		T=T0; //更新实时温度为初始温度
-		while(T>T_min) //一直退火，直到实时温度低于临界温度，这里有点迷，感觉论文没有说清楚
+		old_g.Calc();new_g.Calc(); // calculate fitness
+		Individual better_indiv=old_g; // initialize with the individuals from the previous generation
+		T=T0; // update the real-time temperature to the initial temperature
+		while(T>T_min) // loop until the real-time temperature is below the critical temperature (!!have some question here!!)
 		{
-			if(accept(old_g,new_g,T)) //判断新的个体是否能被接受
+			if(accept(old_g,new_g,T)) // judge if it's acceptable
 			{
-				better_indiv=new_g; //新的个体能被接受，更新
+				better_indiv=new_g; // the new individual is acceptavble, update
 				break;
 			}
-			T*=dec_rate; //按照设定的退火系数进行降温
+			T*=dec_rate; // use the reduction rate to decrease temperature
 		}
-		sel_gen.push_back(better_indiv); //选择最终接受的一个个体
+		sel_gen.push_back(better_indiv); // select the ultimately picked individual
 	}
-	return sel_gen;
+	return sel_gen; //return the answer array (ultimately picked individual)
 }
