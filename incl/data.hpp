@@ -2,13 +2,14 @@
 #define DATA_HPP
 
 #include "json.hpp"
-using json=nlohmann::json;
+using json = nlohmann::json;
+#include <cstddef>
 #include <map>
 #include <string>
 #include <vector>
 
-const size_t MAX_VERTEX_NUM=100;
-const size_t MAX_TARGET_NUM=50;
+constexpr std::size_t MAX_VERTEX_NUM = 100;
+constexpr std::size_t MAX_TARGET_NUM = 50;
 
 extern json data;
 extern std::map<std::string, int> vertex;

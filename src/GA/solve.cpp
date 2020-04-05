@@ -1,26 +1,28 @@
 #include "GA/define.hpp"
 #include "GA/config.hpp"
 #include <vector>
+#include <cstddef>
 #include <utility>
 
 static std::vector<Individual> u, v, w;
 
 void Solve() {
 	GAInit();
-	u=IndividualInit(POPULATION);
-	for(int k=0; k<TIMES; ++k) {
+	u = IndividualInit(POPULATION);
+	for(int k = 0; k < TIMES; ++k) {
 		Select(u, POPULATION);
 		v.clear();
-		for(size_t i=0; i<u.size(); ++i)
-			for(size_t j=0; j<u.size(); ++j)
-				if(i!=j && Random(PR_CROSS))
-					Cross(u[i], u[j], v);
+		for(std::size_t i = 0; i < u.size(); ++i)
+			for(std::size_t j = 0; j < u.size(); ++j)
+				if(i != j && Random(PR_CROSS))
+					Cross(v, u[i], u[j]);
 		w.clear();
 		for(Individual &x: v)
 			if(Random(PR_MUTATION))
-				Mutation(x, w);
+				Mutation(w, std::move(x));
 			else
-				w.push_back(x);
-		u=std::move(w);
+				w.push_back(std::move(x));
+		u = std::move(w);
 	}
+	// answer
 }

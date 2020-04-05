@@ -1,10 +1,11 @@
 #include "GA/define.hpp"
+#include <cstddef>
 #include <random>
 
 static std::vector<double> pr;
 static std::vector<Individual> res;
 
-void Select(std::vector<Individual> &dst, size_t num) {
+void Select(std::vector<Individual> &dst, std::size_t num) {
 	pr.resize(dst.size());
 	for(std::size_t i = 0; i < dst.size(); ++i)
 		pr[i] = dst[i].fitness;
