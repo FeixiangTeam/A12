@@ -32,7 +32,8 @@ std::vector<Individual> IndividualInit(std::size_t num) {
 
 			for(int j = tv_num; j > truck_num; --j) {
 				int d = std::min_element(dis_of + truck_num + 1, dis_of + j + 1) - dis_of;
-				std::swap(idx[d], idx[j]);
+				using std::swap;
+				swap(idx[d], idx[j]);
 				dis_of[d] = dis_of[j];
 				int p = idx[j];
 				now.next[pre[p]] = p;
