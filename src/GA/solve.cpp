@@ -24,5 +24,13 @@ void Solve() {
 				w.push_back(std::move(x));
 		u = std::move(w);
 	}
-	// answer
+	
+	answer.push_back({
+			{"full_path", Map::GetNamedPath(Map::GetFullPath(res))},
+			{"target_path", Map::GetNamedPath(res)},
+			{"distance", Map::CalcPathDistance(res)},
+			{"weight", w},
+			{"truck", data["truck_set"][t]["name"]},
+			{"ratio", w / data["truck_set"][t]["limit"].get<double>()}
+	});
 }
