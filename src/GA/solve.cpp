@@ -37,7 +37,7 @@ void Solve() {
 			tru.clear();
 			tru.push_back(now_tru);
 			weight+=data["target_vertex_set"][i-1]["target"].get<double>();
-			while(next[now_tru])
+			while(best.next[now_tru])
 			{
 				tru[temp_cnt].push_back(best.next[now_tru]);
 				weight+=data["target_vertex_set"][best.next[now_tru]-1]["target"].get<double>();
