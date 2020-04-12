@@ -27,7 +27,7 @@ void Solve() {
 	}
 
 	int tv_num=data["target_vertex_set"].size();
-	for(int i=1;i<=tv_num;i++) degree[next[i]]++;
+	for(int i=1;i<=tv_num;i++) degree[best.next[i]]++;
 	for(int i=1;i<=tv_num;i++)
 	{
 		if(!degree[i])
@@ -39,9 +39,9 @@ void Solve() {
 			weight+=data["target_vertex_set"][i-1]["target"].get<double>();
 			while(next[now_tru])
 			{
-				tru[temp_cnt].push_back(next[now_tru]);
-				weight+=data["target_vertex_set"][next[now_tru]-1]["target"].get<double>();
-				now_tru=next[now_tru];
+				tru[temp_cnt].push_back(best.next[now_tru]);
+				weight+=data["target_vertex_set"][best.next[now_tru]-1]["target"].get<double>();
+				now_tru=best.next[now_tru];
 			}
 			answer.push_back({
 					{"full_path", Map::GetNamedPath(Map::GetFullPath(tru))},
