@@ -4,7 +4,8 @@
 #include <cstddef>
 #include <utility>
 
-static std::vector<Individual> u, v, w;
+static std::vector<Individual> u, v, w, tru;
+static int next[MAX_TARGET_NUM+1], degree[MAX_TARGET_NUM+1];
 
 void Solve() {
 	GAInit();
@@ -24,13 +25,32 @@ void Solve() {
 				w.push_back(std::move(x));
 		u = std::move(w);
 	}
-	
-	answer.push_back({
-			{"full_path", Map::GetNamedPath(Map::GetFullPath(res))},
-			{"target_path", Map::GetNamedPath(res)},
-			{"distance", Map::CalcPathDistance(res)},
-			{"weight", w},
-			{"truck", data["truck_set"][t]["name"]},
-			{"ratio", w / data["truck_set"][t]["limit"].get<double>()}
-	});
+
+	int tv_num=data["target_vertex_set"].size();
+	for(int i=1;i<=tv_num;i++) degree[next[i]]++;
+	for(int i=1;i<=tv_num;i++)
+	{
+		if(!degree[i])
+		{
+			double weight=0;
+			int now_tru=i;
+			tru.clear();
+			tru.push_back(now_tru);
+			weight+=data["target_vertex_set"][i-1]["target"].get<double>();
+			while(next[now_tru])
+			{
+				tru[temp_cnt].push_back(next[now_tru]);
+				weight+=data["target_vertex_set"][next[now_tru]-1]["target"].get<double>();
+				now_tru=next[now_tru];
+			}
+			answer.push_back({
+					{"full_path", Map::GetNamedPath(Map::GetFullPath(tru))},
+					{"target_path", Map::GetNamedPath(tru)},
+					{"distance", Map::CalcPathDistance(tru)},
+					{"weight", weight},
+					{"truck", data["truck_set"][0]["name"]},
+					{"ratio", weight / data["truck_set"][0]["limit"].get<double>()}
+			});
+		}
+	}
 }
