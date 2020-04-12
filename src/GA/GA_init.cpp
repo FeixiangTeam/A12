@@ -7,6 +7,9 @@ std::mt19937 rand_engine(rd());
 
 int total_truck_num;
 Individual best;
+static bool vis[MAX_TARGET_NUM+1];
+static int degree[MAX_TARGET_NUM+1]; //The in-degree at each point (to find out whose value is 1)
+static std::vector<int> tru[MAX_TARGET_NUM+1]; //Save each truck
 
 void GAInit() {
 	best.fitness = 0;
@@ -26,15 +29,11 @@ Individual::Individual(): next(data["target_vertex_set"].size() + 1) { }
 bool Individual::Calc()
 {
 	int tv_num=data["target_vertex_set"].size(); //The number of target points
-	bool vis[MAX_TARGET_NUM+1]; //Make sure each point will be visited only once
 	truck_num=0; //Initializes the number of trucks
 	int task=0; //Original value of fitness
-	int degree[MAX_TARGET_NUM+1]; //The in-degree at each point (to find out whose value is 1)
-	std::vector<int> tru[MAX_TARGET_NUM+1]; //Save each truck
 	memset(degree,0,sizeof(degree)); //Initializes the "degree" array
 	memset(vis,false,sizeof(vis)); //Initializes the "vis" array
 	fitness=-1; //Initializes the value of fitness, if Calc() return false, it means fitness is useless and unavailable
-	
 	/*Judge whether each point is visited only once*/
 	for(int i=1;i<=tv_num;i++)
 	{
@@ -65,7 +64,6 @@ bool Individual::Calc()
 			/*************************/
 			double temp_w=0; //Record the current weight required
 			temp_cnt++; //Increase the variable
-			tru[temp_cnt].push_back(0); //Push the starting point
 			tru[temp_cnt].push_back(i); //Push the first point to arrive
 			temp_w+=data["target_vertex_set"][i-1]["target"].get<double>(); //Cumulative required truck weight
 			int now_tru=i; //Move truck
@@ -75,20 +73,12 @@ bool Individual::Calc()
 				temp_w+=data["target_vertex_set"][next[now_tru]-1]["target"].get<double>(); //Cumulative required truck weight
 				now_tru=next[now_tru]; //Move to the next point
 			}
-			tru[temp_cnt].push_back(0); //Push the finish point
 			if(temp_w>limit_w) return false; //The weight of truck required by the individual exceeds the maximum limit
 		}
 	}
 	/************************************************************/
 	
-	for(int i=1;i<=tru_num;i++)
-	{
-		int tr_size=tru[i].size(); //Get the number of point for each truck
-		for(int j=0;j<tr_size-1;j++)
-		{
-			task+=Map::dis[tru[i][j]][tru[i][j+1]]; //Calculate total distance
-		}
-	}
+	for(int i=1;i<=tru_num;i++) task+=Map::CalcPathDistance(tru[i]);
 	task+=BETA*tru_num;
 	fitness=FITNESS_FACTOR/task;
 	if(fitness > best.fitness)
