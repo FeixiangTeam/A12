@@ -43,13 +43,15 @@ void Solve() {
 				weight+=data["target_vertex_set"][best.next[now_tru]-1]["target"].get<double>();
 				now_tru=best.next[now_tru];
 			}
+			int this_tru_type = best_weight[ best_mp[weight] ].back();
+			best_weight[ best_mp[weight] ].pop_back();
 			answer.push_back({
 					{"full_path", Map::GetNamedPath(Map::GetFullPath(tru))},
 					{"target_path", Map::GetNamedPath(tru)},
 					{"distance", Map::CalcPathDistance(tru)},
 					{"weight", weight},
-					{"truck", data["truck_set"][0]["name"]},
-					{"ratio", weight / data["truck_set"][0]["limit"].get<double>()}
+					{"truck", data["truck_set"][this_tru_type]["name"]},
+					{"ratio", weight / data["truck_set"][this_tru_type]["limit"].get<double>()}
 			});
 		}
 	}

@@ -5,11 +5,29 @@
 std::random_device rd;
 std::mt19937 rand_engine(rd());
 
+struct Tru
+{
+	int id; // The type
+	int res; // The number of trucks remaining
+	double limit; // The limit weight
+	bool operator < const (Tru tr) const
+	{
+		return limit<tr.limit; // Sort by limit (greedy strategy)
+	}
+};
+
 int total_truck_num;
 Individual best;
+std::map<double,int> best_mp; // Hash
+std::vector<int> best_weight[MAX_TARGET_NUM+1]; // Map weight to type
+
+static std::map<double,int> mp; // Temporary hash container for this individual
+static std::vector<int> weight_map[MAX_TARGET_NUM+1]; // Temporary hash container for this individual
 static bool vis[MAX_TARGET_NUM+1];
 static int degree[MAX_TARGET_NUM+1]; //The in-degree at each point (to find out whose value is 1)
-static std::vector<int> tru[MAX_TARGET_NUM+1]; //Save each truck
+static std::vector<int> tru[MAX_TARGET_NUM+1]; // Save each truck
+static double req_weight[MAX_TARGET_NUM+1]; // The minimum weight a truck need to require
+static Tru tru[MAX_TARGET_NUM+1];
 
 void GAInit() {
 	best.fitness = 0;
@@ -29,11 +47,23 @@ Individual::Individual(): next(data["target_vertex_set"].size() + 1) { }
 bool Individual::Calc()
 {
 	int tv_num=data["target_vertex_set"].size(); //The number of target points
-	truck_num=0; //Initializes the number of trucks
+	int truck_type=data["truck_set"].size(); // The number of truck type
+	int t_cnt=0; // Temporary variable
 	int task=0; //Original value of fitness
-	memset(degree,0,sizeof(degree)); //Initializes the "degree" array
-	memset(vis,false,sizeof(vis)); //Initializes the "vis" array
+	truck_num=0; //Initializes the number of trucks
 	fitness=-1; //Initializes the value of fitness, if Calc() return false, it means fitness is useless and unavailable
+	/*To get number and limited weight of trucks of each type*/
+	for(const auto &truck: data["truck_set"])
+	{
+		const auto &num=truck["num"];
+		const auto &limit=truck["limit"];
+		if(num.is_null()) tru.res[t_cnt]=0; // It means this truck type has an unlimited quantity
+		else tru.res[t_cnt]=num.get<int>(); // ...limited quantity
+		tru.limit[t_cnt]=limit.get<double>();
+		t_cnt++;
+	}
+	/*********************************************************/
+	
 	/*Judge whether each point is visited only once*/
 	for(int i=1;i<=tv_num;i++)
 	{
@@ -53,35 +83,61 @@ bool Individual::Calc()
 	if(tru_num>total_truck_num) return false; //The number of truck required by the individual exceeds the maximum limit
 	/**********************************************/
 	
-	/*Judge whether each truck is overweight to serve the target*/
-	int temp_cnt=0; //Record the number of truck in real time (provide a variable)
+	/*Calculate each truck's required minimum weight to serve the target*/
+	int temp_cnt=0; //Record the number of truck in real time (temporary variable)
 	for(int i=1;i<=tv_num;i++)
 	{
 		if(!degree[i]) //The starting point (the first point arrive from point 0)
 		{
 			/*!!Bug: the types of the trucks are not defined*/
-			double limit_w=data["truck_set"][0]["limit"];// Get car weight limit
+//			double limit_w=data["truck_set"][0]["limit"];// Get car weight limit
 			/*************************/
-			double temp_w=0; //Record the current weight required
 			temp_cnt++; //Increase the variable
 			tru[temp_cnt].push_back(i); //Push the first point to arrive
-			temp_w+=data["target_vertex_set"][i-1]["target"].get<double>(); //Cumulative required truck weight
+			req_weight[temp_cnt]+=data["target_vertex_set"][i-1]["target"].get<double>(); //Cumulative required truck weight
 			int now_tru=i; //Move truck
 			while(next[now_tru]) //Move until the last point
 			{
 				tru[temp_cnt].push_back(next[now_tru]); //Push next point
-				temp_w+=data["target_vertex_set"][next[now_tru]-1]["target"].get<double>(); //Cumulative required truck weight
+				req_weight[temp_cnt]+=data["target_vertex_set"][next[now_tru]-1]["target"].get<double>(); //Cumulative required truck weight
 				now_tru=next[now_tru]; //Move to the next point
 			}
-			if(temp_w>limit_w) return false; //The weight of truck required by the individual exceeds the maximum limit
+//			if(temp_w>limit_w) return false; //The weight of truck required by the individual exceeds the maximum limit
 		}
 	}
 	/************************************************************/
+	
+	/*Choose the best type for each truck*/
+	sort(req_weight+1,req_weight+tru_num+1);
+	sort(tru,tru+truck_type);
+	int now_type=0, hash_val=1;
+	for(int i=1;i<=tru_num;i++)
+	{
+		while( (now_type < truck_type) && (req_weight[i] > tru[now_type].limit) ) now_type++;
+		if(now_type==truck_type) return false; // Existing trucks cannot meet the requirements
+		std::map<double,int>::iterator iter = mp.find(req_weight[i]);
+		if(iter==mp.end()) mp[req_weight[i]] = hash_val++;
+		if(tru[now_type].res==0) // Unlimited number of trucks
+		{
+			weight_map[ mp[ req_weight[i] ] ].push_back(now_type);
+		}
+		else // Limited number of trucks
+		{
+			weight_map[ mp[ req_weight[i] ] ].push_back(now_type);
+			tru[now_type].res--;
+			if(!tru[now_type].res) now_type++; // To avoid to recognize as unlimited number of trucks
+		}
+	}
+	/*************************************/
 	
 	for(int i=1;i<=tru_num;i++) task+=Map::CalcPathDistance(tru[i]);
 	task+=BETA*tru_num;
 	fitness=FITNESS_FACTOR/task;
 	if(fitness > best.fitness)
+	{
 		best = *this; //Update the best individual
+		best_mp = std::move(mp);
+		best_weight = std::move(weight_map);
+	}
 	return true; //This individual is acceptable
 }
