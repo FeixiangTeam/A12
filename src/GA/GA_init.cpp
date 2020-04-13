@@ -1,6 +1,7 @@
 #include "GA/define.hpp"
 #include "data.hpp"
 #include "GA/config.hpp"
+#include <algorithm>
 
 std::random_device rd;
 std::mt19937 rand_engine(rd());
@@ -10,7 +11,7 @@ struct Tru
 	int id; // The type
 	int res; // The number of trucks remaining
 	double limit; // The limit weight
-	bool operator < const (Tru tr) const
+	bool operator < (const Tru &tr) const
 	{
 		return limit<tr.limit; // Sort by limit (greedy strategy)
 	}
@@ -27,7 +28,7 @@ static bool vis[MAX_TARGET_NUM+1];
 static int degree[MAX_TARGET_NUM+1]; //The in-degree at each point (to find out whose value is 1)
 static std::vector<int> tru[MAX_TARGET_NUM+1]; // Save each truck
 static double req_weight[MAX_TARGET_NUM+1]; // The minimum weight a truck need to require
-static Tru tru[MAX_TARGET_NUM+1];
+static Tru truc[MAX_TARGET_NUM+1];
 
 void GAInit() {
 	best.fitness = 0;
@@ -57,9 +58,9 @@ bool Individual::Calc()
 	{
 		const auto &num=truck["num"];
 		const auto &limit=truck["limit"];
-		if(num.is_null()) tru.res[t_cnt]=0; // It means this truck type has an unlimited quantity
-		else tru.res[t_cnt]=num.get<int>(); // ...limited quantity
-		tru.limit[t_cnt]=limit.get<double>();
+		if(num.is_null()) truc[t_cnt].res=0; // It means this truck type has an unlimited quantity
+		else truc[t_cnt].res=num.get<int>(); // ...limited quantity
+		truc[t_cnt].limit=limit.get<double>();
 		t_cnt++;
 	}
 	/*********************************************************/
@@ -69,7 +70,7 @@ bool Individual::Calc()
 	{
 		if(!next[i]) //next[i]==0, it means back to the starting point
 		{
-			tru_num++; //Calculate the number of trucks
+			truck_num++; //Calculate the number of trucks
 			if(vis[i]) return false; //It means this point has been visited more than once
 			vis[i]=true; //Mark that this point has been visited
 		}
@@ -80,7 +81,7 @@ bool Individual::Calc()
 			degree[next[i]]++; //Record the number of visits
 		}
 	}
-	if(tru_num>total_truck_num) return false; //The number of truck required by the individual exceeds the maximum limit
+	if(truck_num>total_truck_num) return false; //The number of truck required by the individual exceeds the maximum limit
 	/**********************************************/
 	
 	/*Calculate each truck's required minimum weight to serve the target*/
@@ -108,36 +109,36 @@ bool Individual::Calc()
 	/************************************************************/
 	
 	/*Choose the best type for each truck*/
-	sort(req_weight+1,req_weight+tru_num+1);
-	sort(tru,tru+truck_type);
+	std::sort(req_weight+1,req_weight+truck_num+1);
+	std::sort(truc,truc+truck_type);
 	int now_type=0, hash_val=1;
-	for(int i=1;i<=tru_num;i++)
+	for(int i=1;i<=truck_num;i++)
 	{
-		while( (now_type < truck_type) && (req_weight[i] > tru[now_type].limit) ) now_type++;
+		while( (now_type < truck_type) && (req_weight[i] > truc[now_type].limit) ) now_type++;
 		if(now_type==truck_type) return false; // Existing trucks cannot meet the requirements
 		std::map<double,int>::iterator iter = mp.find(req_weight[i]);
 		if(iter==mp.end()) mp[req_weight[i]] = hash_val++;
-		if(tru[now_type].res==0) // Unlimited number of trucks
+		if(truc[now_type].res==0) // Unlimited number of trucks
 		{
 			weight_map[ mp[ req_weight[i] ] ].push_back(now_type);
 		}
 		else // Limited number of trucks
 		{
 			weight_map[ mp[ req_weight[i] ] ].push_back(now_type);
-			tru[now_type].res--;
-			if(!tru[now_type].res) now_type++; // To avoid to recognize as unlimited number of trucks
+			truc[now_type].res--;
+			if(!truc[now_type].res) now_type++; // To avoid to recognize as unlimited number of trucks
 		}
 	}
 	/*************************************/
 	
-	for(int i=1;i<=tru_num;i++) task+=Map::CalcPathDistance(tru[i]);
-	task+=BETA*tru_num;
+	for(int i=1;i<=truck_num;i++) task+=Map::CalcPathDistance(tru[i]);
+	task+=BETA*truck_num;
 	fitness=FITNESS_FACTOR/task;
 	if(fitness > best.fitness)
 	{
 		best = *this; //Update the best individual
 		best_mp = std::move(mp);
-		best_weight = std::move(weight_map);
+		for(int i=1;i<hash_val;i++) best_weight[i] = std::move(weight_map[i]);
 	}
 	return true; //This individual is acceptable
 }
