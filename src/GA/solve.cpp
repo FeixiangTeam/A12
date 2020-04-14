@@ -4,13 +4,15 @@
 #include <cstddef>
 #include <utility>
 
-static std::vector<Individual> u, v, w, tru;
+static std::vector<Individual> u, v, w;
 static int next[MAX_TARGET_NUM+1], degree[MAX_TARGET_NUM+1];
+static std::vector<int> tru;
 
 void Solve() {
 	GAInit();
 	u = IndividualInit(POPULATION);
 	for(int k = 0; k < TIMES; ++k) {
+		printf("Solve Cycle %d\n", k);
 		Select(u, POPULATION);
 		v.clear();
 		for(std::size_t i = 0; i < u.size(); ++i)
@@ -46,12 +48,12 @@ void Solve() {
 			int this_tru_type = best_weight[ best_mp[weight] ].back();
 			best_weight[ best_mp[weight] ].pop_back();
 			answer.push_back({
-					{"full_path", Map::GetNamedPath(Map::GetFullPath(tru))},
-					{"target_path", Map::GetNamedPath(tru)},
-					{"distance", Map::CalcPathDistance(tru)},
-					{"weight", weight},
-					{"truck", data["truck_set"][this_tru_type]["name"]},
-					{"ratio", weight / data["truck_set"][this_tru_type]["limit"].get<double>()}
+				{"full_path", Map::GetNamedPath(Map::GetFullPath(tru))},
+				{"target_path", Map::GetNamedPath(tru)},
+				{"distance", Map::CalcPathDistance(tru)},
+				{"weight", weight},
+				{"truck", data["truck_set"][this_tru_type]["name"]},
+				{"ratio", weight / data["truck_set"][this_tru_type]["limit"].get<double>()}
 			});
 		}
 	}

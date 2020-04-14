@@ -8,10 +8,12 @@ VPATH=${SRC}:${SRC}/GA
 
 .cpp.o:
 	${CC} -c $< -I ${INCL} -std=c++17 -Wall
-.o:
+
+GAexec: main.o data.o GA_init.o individual_init.o select.o mutation.o cross.o solve.o
 	${CC} $^ -o ${BIN}/$@
 
 bruteforce: main.o data.o bruteforce.o
+	${CC} $^ -o ${BIN}/$@
 
 test: test.o main.o data.o GA_init.o individual_init.o cross.o
 	${CC} $^ -o ${BIN}/$@

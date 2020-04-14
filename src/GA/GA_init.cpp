@@ -6,6 +6,10 @@
 std::random_device rd;
 std::mt19937 rand_engine(rd());
 
+bool Random(double Pr) {
+	return rand_engine() <= Pr * rand_engine.max();
+}
+
 struct Tru
 {
 	int id; // The type
@@ -64,7 +68,7 @@ bool Individual::Calc()
 		t_cnt++;
 	}
 	/*********************************************************/
-	
+
 	/*Judge whether each point is visited only once*/
 	for(int i=1;i<=tv_num;i++)
 	{
@@ -83,7 +87,7 @@ bool Individual::Calc()
 	}
 	if(truck_num>total_truck_num) return false; //The number of truck required by the individual exceeds the maximum limit
 	/**********************************************/
-	
+
 	/*Calculate each truck's required minimum weight to serve the target*/
 	int temp_cnt=0; //Record the number of truck in real time (temporary variable)
 	for(int i=1;i<=tv_num;i++)
@@ -107,7 +111,7 @@ bool Individual::Calc()
 		}
 	}
 	/************************************************************/
-	
+
 	/*Choose the best type for each truck*/
 	std::sort(req_weight+1,req_weight+truck_num+1);
 	std::sort(truc,truc+truck_type);
@@ -130,7 +134,7 @@ bool Individual::Calc()
 		}
 	}
 	/*************************************/
-	
+
 	for(int i=1;i<=truck_num;i++) task+=Map::CalcPathDistance(tru[i]);
 	task+=BETA*truck_num;
 	fitness=FITNESS_FACTOR/task;
