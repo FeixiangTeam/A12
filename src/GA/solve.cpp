@@ -4,31 +4,9 @@
 #include <cstddef>
 #include <utility>
 
-struct Tru
-{
-	int id; // The type
-	int res; // The number of trucks remaining
-	double limit; // The limit weight
-	bool operator < (const Tru &tr) const
-	{
-		return limit<tr.limit; // Sort by limit (greedy strategy)
-	}
-};
-struct Route
-{
-	std::vector<int> tru;
-	double weight;
-	bool operator < (const Route &rou) const
-	{
-		return weight<rou.weight;
-	}
-};
-
 static std::vector<Individual> u, v, w;
-static int next[MAX_TARGET_NUM+1], degree[MAX_TARGET_NUM+1];
-static Tru truc[MAX_TARGET_NUM+1];
-static Route route[MAX_TARGET_NUM+1];
 
+void Answer();
 
 void Solve() {
 	GAInit();
@@ -49,58 +27,57 @@ void Solve() {
 				w.push_back(std::move(x));
 		u = std::move(w);
 	}
-	
-	// answer
-	int t_cnt=0; // Temporary variable
-	int tv_num=data["target_vertex_set"].size();
-	int truck_type=data["truck_set"].size(); // The number of truck type
-	for(const auto &truck: data["truck_set"])
-	{
-		const auto &num=truck["num"];
-		const auto &limit=truck["limit"];
-		if(num.is_null()) truc[t_cnt].res=0; // It means this truck type has an unlimited quantity
-		else truc[t_cnt].res=num.get<int>(); // ...limited quantity
-		truc[t_cnt].limit=limit.get<double>();
-		t_cnt++;
+	Answer();
+}
+
+static int degree[MAX_TARGET_NUM + 1];
+struct Task {
+	int begin;
+	double weight;
+	friend bool operator<(const Task &x, const Task &y) {
+		return x.weight < y.weight;
 	}
-	for(int i=1;i<=tv_num;i++) degree[best.next[i]]++;
-	t_cnt=0;
-	for(int i=1;i<=tv_num;i++)
-	{
-		if(!degree[i])
-		{
-			route[++t_cnt].weight=0;
-			int now_tru=i;
-			route[t_cnt].tru.clear();
-			route[t_cnt].tru.push_back(now_tru);
-			route[t_cnt].weight+=data["target_vertex_set"][i-1]["target"].get<double>();
-			while(best.next[now_tru])
-			{
-				route[t_cnt].tru.push_back(best.next[now_tru]);
-				route[t_cnt].weight+=data["target_vertex_set"][best.next[now_tru]-1]["target"].get<double>();
-				now_tru=best.next[now_tru];
-			}
-		}
+};
+static int used[MAX_TARGET_NUM];
+
+void Answer() {
+	const int tv_num = data["target_vertex_set"].size();
+	const int truck_type_num = trucks.size();
+
+	const auto &next = best.next;
+	int truck_num = 0;
+	std::fill(degree + 1, degree + tv_num + 1, 0);
+	for(int i = 1; i <= tv_num; ++i) {
+		if(next[i] == 0) ++truck_num;
+		else ++degree[next[i]];
 	}
-	std::sort(truc,truc+truck_type);
-	std::sort(route+1,route+best.truck_num+1);
-	int now_type=0;
-	for(int i=1;i<=best.truck_num;i++)
-	{
-		while( (now_type < truck_type) && (route[i].weight > truc[now_type].limit) ) now_type++;
-		int this_tru_type = now_type;
-		if(truc[now_type].res!=0) // Limited number of trucks
-		{
-			truc[now_type].res--;
-			if(!truc[now_type].res) now_type++; // To avoid to recognize as unlimited number of trucks
+
+	std::vector<Task> tasks(truck_num);
+	for(int i = 1, j = 0; i <= tv_num; ++i)
+		if(degree[i] == 0) {
+			tasks[j].begin = i;
+			double weight = 0;
+			for(int p = i; p; p = next[p])
+				weight += data["target_vertex_set"][p - 1]["target"].get<double>();
+			tasks[j].weight = weight;
+			++j;
 		}
+	std::sort(tasks.begin(), tasks.end());
+
+	std::fill(used, used + truck_type_num, 0);
+	for(int i = 0, j = 0; i < truck_num; ++i) {
+		while(j < truck_type_num && (tasks[i].weight > trucks[j].limit || used[j] >= trucks[j].num)) ++j;
+		++used[j];
+
+		std::vector<int> path;
+		for(int p = tasks[i].begin; p; p = next[p]) path.push_back(p);
 		answer.push_back({
-			{"full_path", Map::GetNamedPath(Map::GetFullPath(route[i].tru))},
-			{"target_path", Map::GetNamedPath(route[i].tru)},
-			{"distance", Map::CalcPathDistance(route[i].tru)},
-			{"weight", route[i].weight},
-			{"truck", data["truck_set"][this_tru_type]["name"]},
-			{"ratio", route[i].weight / data["truck_set"][this_tru_type]["limit"].get<double>()}
+			{"full_path", Map::GetNamedPath(Map::GetFullPath(path))},
+			{"target_path", Map::GetNamedPath(path)},
+			{"distance", Map::CalcPathDistance(path)},
+			{"weight", tasks[i].weight},
+			{"truck", data["truck_set"][trucks[j].id]["name"]},
+			{"ratio", tasks[i].weight / trucks[j].limit}
 		});
 	}
 }

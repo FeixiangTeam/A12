@@ -23,10 +23,14 @@ void Cross(std::vector<Individual> &dst, const Individual &a, const Individual &
 				int pre = 0;
 				for(int p = i; p; p = b.next[p])
 					if(flag[p]) flag[p] = false;
+<<<<<<< HEAD
 					else {
 						if(pre != 0) res.next[pre] = p;
 						pre = p;
 					}
+=======
+					else pre = res.next[pre] = p;
+>>>>>>> cxy004
 				res.next[pre] = 0;
 			}
 	} while(!res.Calc());

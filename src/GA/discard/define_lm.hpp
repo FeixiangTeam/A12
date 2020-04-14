@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <random>
 #include <vector>
-#include <map>
 
 extern std::random_device rd;
 extern std::mt19937 rand_engine;
@@ -13,17 +12,6 @@ extern std::mt19937 rand_engine;
 bool Random(double pr);
 
 extern int total_truck_num;
-
-struct Truck {
-	int id;
-	int num;
-	double limit;
-	friend bool operator<(const Truck &x, const Truck &y) {
-		return x.limit < y.limit;
-	}
-};
-
-extern std::vector<Truck> trucks;
 
 void GAInit();
 

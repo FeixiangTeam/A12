@@ -10,43 +10,40 @@ bool Random(double Pr) {
 	return rand_engine() <= Pr * rand_engine.max();
 }
 
+struct Tru
+{
+	int id; // The type
+	int res; // The number of trucks remaining
+	double limit; // The limit weight
+	bool operator < (const Tru &tr) const
+	{
+		return limit<tr.limit; // Sort by limit (greedy strategy)
+	}
+};
+
 int total_truck_num;
 Individual best;
 
-std::vector<Truck> trucks;
+static int degree[MAX_TARGET_NUM+1]; //The in-degree at each point (to find out whose value is 1)
+static std::vector<int> tru[MAX_TARGET_NUM+1]; // Save each truck
+static double req_weight[MAX_TARGET_NUM+1]; // The minimum weight a truck need to require
+static Tru truc[MAX_TARGET_NUM+1];
 
 void GAInit() {
-	const int tv_num = data["target_vertex_set"].size();
-
 	best.fitness = 0;
-
 	for(const auto &truck: data["truck_set"]) {
 		const auto &num = truck["num"];
 		if(!num.is_null()) {
 			total_truck_num += num.get<int>();
 		} else {
-			total_truck_num = tv_num;
+			total_truck_num = data["target_vertex_set"].size();
 			break;
 		}
 	}
-
-	const int truck_type_num = data["truck_set"].size();
-	trucks.resize(truck_type_num);
-	for(int i = 0; i < truck_type_num; ++i) {
-		const auto &truck = data["truck_set"][i];
-		const auto &num = truck["num"];
-		Truck &t = trucks[i];
-		t.id = i;
-		if(!num.is_null()) t.num = num.get<int>();
-		else t.num = tv_num;
-		t.limit = truck["limit"].get<double>();
-	}
-	std::sort(trucks.begin(), trucks.end());
 }
 
 Individual::Individual(): next(data["target_vertex_set"].size() + 1) { }
 
-<<<<<<< HEAD
 bool Individual::Calc()
 {
 	memset(req_weight,0,sizeof(req_weight));
@@ -107,46 +104,31 @@ bool Individual::Calc()
 			}
 //			if(temp_w>limit_w) return false; //The weight of truck required by the individual exceeds the maximum limit
 		}
-=======
-static int degree[MAX_TARGET_NUM + 1];
-static double weight[MAX_TARGET_NUM];
-static int used[MAX_TARGET_NUM];
-
-bool Individual::Calc() {
-	const int tv_num = data["target_vertex_set"].size();
-	const int truck_type_num = trucks.size();
-
-	truck_num = 0;
-	std::fill(degree + 1, degree + tv_num + 1, 0);
-	for(int i = 1; i <= tv_num; ++i) {
-		if(next[i] == 0) ++truck_num;
-		else ++degree[next[i]];
->>>>>>> cxy004
 	}
-	if(truck_num > total_truck_num) return false;
+	/************************************************************/
 
-	for(int i = 1, j = 0; i <= tv_num; ++i)
-		if(degree[i] == 0) {
-			weight[j] = 0;
-			for(int p = i; p; p = next[p])
-				weight[j] += data["target_vertex_set"][p - 1]["target"].get<double>();
-			++j;
+	/*Choose the best type for each truck*/
+	std::sort(req_weight+1,req_weight+truck_num+1);
+	std::sort(truc,truc+truck_type);
+	int now_type=0, hash_val=1;
+	for(int i=1;i<=truck_num;i++)
+	{
+		while( (now_type < truck_type) && (req_weight[i] > truc[now_type].limit) ) now_type++;
+		if(now_type==truck_type) return false; // Existing trucks cannot meet the requirements
+		else // Limited number of trucks
+		{
+			truc[now_type].res--;
+			if(!truc[now_type].res) now_type++; // To avoid to recognize as unlimited number of trucks
 		}
-	std::sort(weight, weight + truck_num);
-
-	std::fill(used, used + truck_type_num, 0);
-	for(int i = 0, j = 0; i < truck_num; ++i) {
-		while(j < truck_type_num && (weight[i] > trucks[j].limit || used[j] >= trucks[j].num)) ++j;
-		if(j >= truck_type_num) return false;
-		++used[j];
 	}
+	/*************************************/
 
-	double cost = BETA * truck_num;
-	for(int i = 1; i <= truck_num; ++i)
-		if(degree[i] == 0) cost += Map::dis[0][i];
-		else cost += Map::dis[i][next[i]];
-	fitness = FITNESS_FACTOR / cost;
-
-	if(fitness > best.fitness) best = *this;
-	return true;
+	for(int i=1;i<=truck_num;i++) task+=Map::CalcPathDistance(tru[i]);
+	task+=BETA*truck_num;
+	fitness=FITNESS_FACTOR/task;
+	if(fitness > best.fitness)
+	{
+		best = *this; //Update the best individual
+	}
+	return true; //This individual is acceptable
 }
