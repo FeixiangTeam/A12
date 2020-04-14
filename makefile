@@ -7,10 +7,10 @@ CC=g++-9
 VPATH=${SRC}:${SRC}/GA
 
 .cpp.o:
-	${CC} -c $< -I ${INCL} -std=c++17 -Wall
+	${CC} -c $< -I ${INCL} -ggdb -std=c++17 -Wall
 
-GAexec: main.o data.o GA_init.o individual_init.o select.o mutation.o cross.o solve.o
-	${CC} $^ -o ${BIN}/$@
+GA: main.o data.o GA_init.o individual_init.o select.o mutation.o cross.o solve.o
+	${CC} $^ -o ${BIN}/$@ -ggdb
 
 bruteforce: main.o data.o bruteforce.o
 	${CC} $^ -o ${BIN}/$@
