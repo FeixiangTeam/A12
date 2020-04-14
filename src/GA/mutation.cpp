@@ -1,50 +1,43 @@
 #include "GA/define.hpp"
+#include "data.hpp"
 #include <algorithm>
-const int MAXP=10000000,times_mu=5,pm=2333333;
-int pre[35],car[35],in[35];
-void Mutation(std::vector<Individual> &dst, Individual x)
-{
+
+const int times_mu = 5;
+int first[MAX_TARGET_NUM + 1], degree[MAX_TARGET_NUM + 1];
+
+void Mutation(std::vector<Individual> &dst, Individual x) {
 	using std::swap;
-	int N=data["target_vertex_set"].size();
-	bool flag=0;
-	for(int i=1;i<=N;i++)in[x.next[i]]++;
-	for(int i=1;i<=N;i++)if(!in[i]){
-		int temp=i;
-		while(x.next[temp])car[temp]=i,temp=x.next[temp];
-		car[temp]=i;
-	}
-	for(int i=1;i<=times_mu;i++){
-		Individual temp=x;
-		int a=rand()%N+1,b=rand()%N+1;
-		if(a!=b&&rand()%MAXP<=pm){
-			if(car[a]==car[b]){
-				int j=car[a];
-				while(j!=a&&j!=b)j=x.next[j];
-				if(j==b)swap(a,b);
-				temp.next[a]=temp.next[b];
-				temp.next[b]=0;temp.truck_num++;
+	const int tv_num = data["target_vertex_set"].size();
+	static std::uniform_int_distribution<> choice_gen(1, tv_num);
+
+	std::fill(degree + 1, degree + tv_num + 1, 0);
+	for(int i = 1; i <= tv_num; ++i) ++degree[x.next[i]];
+	for(int i = 1; i <= tv_num; ++i) if(degree[i] == 0)
+		for(int p = i; p; p = x.next[p]) first[p] = i;
+
+	bool flag = false;
+	for(int k = 1; k <= times_mu; ++k) {
+		Individual res = x;
+		int a = choice_gen(rand_engine), b = choice_gen(rand_engine);
+		if(a == b) continue;
+		if(first[a] == first[b]) {
+			int p = first[a];
+			while(p != a && p != b) p = x.next[p];
+			if(p == b) swap(a, b);
+			res.next[a] = res.next[b];
+			res.next[b] = 0;
+		} else {
+			if(res.next[a] == 0 || res.next[b] == 0) {
+				if(res.next[a]) swap(a, b);
+				res.next[a] = first[b];
+			} else {
+				int p = res.next[a];
+				while(res.next[p]) p = res.next[p];
+				res.next[p] = first[a];
+				swap(res.next[a], res.next[b]);
 			}
-			else
-			{
-				if(!temp.next[a]||!temp.next[b])
-				{
-					if(temp.next[a])swap(a,b);
-					temp.next[a]=car[b];
-				}
-				else
-				{
-					int j=temp.next[a];
-					while(temp.next[j])j=temp.next[j];
-					temp.next[j]=car[a];
-					int t=temp.next[a];
-					temp.next[a]=temp.next[b];
-					temp.next[b]=t;
-				}
-				temp.truck_num--;
-			}
-			if(temp.Calc()&&temp.fitness>=x.fitness)dst.push_back(temp),flag=1;
 		}
+		if(res.Calc()) { dst.push_back(res); flag = true; }
 	}
-	if(!flag)dst.push_back(x);
-	return;
+	if(!flag) dst.push_back(x);
 }
