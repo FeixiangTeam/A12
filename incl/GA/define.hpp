@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <random>
 #include <vector>
-#include <map>
 
 extern std::random_device rd;
 extern std::mt19937 rand_engine;
@@ -25,8 +24,6 @@ struct Individual {
 };
 
 extern Individual best;
-extern std::map<double,int> best_mp;
-extern std::vector<int> best_weight[MAX_TARGET_NUM+1];
 
 std::vector<Individual> IndividualInit(std::size_t num);
 

@@ -23,12 +23,7 @@ struct Tru
 
 int total_truck_num;
 Individual best;
-std::map<double,int> best_mp; // Hash
-std::vector<int> best_weight[MAX_TARGET_NUM+1]; // Map weight to type
 
-static std::map<double,int> mp; // Temporary hash container for this individual
-static std::vector<int> weight_map[MAX_TARGET_NUM+1]; // Temporary hash container for this individual
-static bool vis[MAX_TARGET_NUM+1];
 static int degree[MAX_TARGET_NUM+1]; //The in-degree at each point (to find out whose value is 1)
 static std::vector<int> tru[MAX_TARGET_NUM+1]; // Save each truck
 static double req_weight[MAX_TARGET_NUM+1]; // The minimum weight a truck need to require
@@ -51,6 +46,8 @@ Individual::Individual(): next(data["target_vertex_set"].size() + 1) { }
 
 bool Individual::Calc()
 {
+	memset(req_weight,0,sizeof(req_weight));
+	memset(degree,0,sizeof(degree));
 	int tv_num=data["target_vertex_set"].size(); //The number of target points
 	int truck_type=data["truck_set"].size(); // The number of truck type
 	int t_cnt=0; // Temporary variable
@@ -62,6 +59,7 @@ bool Individual::Calc()
 	{
 		const auto &num=truck["num"];
 		const auto &limit=truck["limit"];
+		truc[t_cnt].id=truc[t_cnt].limit=truc[t_cnt].res=0;
 		if(num.is_null()) truc[t_cnt].res=0; // It means this truck type has an unlimited quantity
 		else truc[t_cnt].res=num.get<int>(); // ...limited quantity
 		truc[t_cnt].limit=limit.get<double>();
@@ -72,18 +70,15 @@ bool Individual::Calc()
 	/*Judge whether each point is visited only once*/
 	for(int i=1;i<=tv_num;i++)
 	{
-		if(!next[i]) //next[i]==0, it means back to the starting point
+		if(next[i])
 		{
-			truck_num++; //Calculate the number of trucks
-			if(vis[i]) return false; //It means this point has been visited more than once
-			vis[i]=true; //Mark that this point has been visited
-		}
-		else
-		{
-			if(vis[next[i]]) return false; //It means next point has been visited more than once
-			vis[next[i]]=true; //Mark that the next point has been visited
 			degree[next[i]]++; //Record the number of visits
+			if(degree[next[i]]>1) return false;
 		}
+	}
+	for(int i=1;i<=tv_num;i++)
+	{
+		if(!degree[i]) truck_num++;
 	}
 	if(truck_num>total_truck_num) return false; //The number of truck required by the individual exceeds the maximum limit
 	/**********************************************/
@@ -98,6 +93,7 @@ bool Individual::Calc()
 //			double limit_w=data["truck_set"][0]["limit"];// Get car weight limit
 			/*************************/
 			temp_cnt++; //Increase the variable
+			tru[temp_cnt].clear();
 			tru[temp_cnt].push_back(i); //Push the first point to arrive
 			req_weight[temp_cnt]+=data["target_vertex_set"][i-1]["target"].get<double>(); //Cumulative required truck weight
 			int now_tru=i; //Move truck
@@ -120,15 +116,8 @@ bool Individual::Calc()
 	{
 		while( (now_type < truck_type) && (req_weight[i] > truc[now_type].limit) ) now_type++;
 		if(now_type==truck_type) return false; // Existing trucks cannot meet the requirements
-		std::map<double,int>::iterator iter = mp.find(req_weight[i]);
-		if(iter==mp.end()) mp[req_weight[i]] = hash_val++;
-		if(truc[now_type].res==0) // Unlimited number of trucks
-		{
-			weight_map[ mp[ req_weight[i] ] ].push_back(now_type);
-		}
 		else // Limited number of trucks
 		{
-			weight_map[ mp[ req_weight[i] ] ].push_back(now_type);
 			truc[now_type].res--;
 			if(!truc[now_type].res) now_type++; // To avoid to recognize as unlimited number of trucks
 		}
@@ -141,8 +130,6 @@ bool Individual::Calc()
 	if(fitness > best.fitness)
 	{
 		best = *this; //Update the best individual
-		best_mp = std::move(mp);
-		for(int i=1;i<hash_val;i++) best_weight[i] = std::move(weight_map[i]);
 	}
 	return true; //This individual is acceptable
 }
