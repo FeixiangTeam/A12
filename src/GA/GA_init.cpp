@@ -80,7 +80,6 @@ bool Individual::Calc()
 	{
 		if(!degree[i]) truck_num++;
 	}
-	if(truck_num>total_truck_num) return false; //The number of truck required by the individual exceeds the maximum limit
 	/**********************************************/
 
 	/*Calculate each truck's required minimum weight to serve the target*/
