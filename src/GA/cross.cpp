@@ -13,7 +13,6 @@ void Cross(std::vector<Individual> &dst, const Individual &a, const Individual &
 	Individual res;
 	do {
 		std::fill(res.next.begin(), res.next.end(), 0);
-		std::fill(flag + 1, flag + tv_num + 1, false);
 		for(int p = choice_gen(rand_engine); p; p = a.next[p]) {
 			res.next[p] = a.next[p];
 			flag[p] = true;
@@ -24,7 +23,8 @@ void Cross(std::vector<Individual> &dst, const Individual &a, const Individual &
 			if(degree[i] == 0) {
 				int pre = 0;
 				for(int p = i; p; p = b.next[p])
-					if(!flag[p]) {
+					if(flag[p]) flag[p] = false;
+					else {
 						if(pre != 0) res.next[pre] = p;
 						pre = p;
 					}
