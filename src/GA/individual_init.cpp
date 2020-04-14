@@ -8,7 +8,7 @@ static double dis_of[MAX_TARGET_NUM + 1];
 static int pre[MAX_TARGET_NUM + 1];
 
 std::vector<Individual> IndividualInit(std::size_t num) {
-	static const int tv_num = data["target_vertex_set"].size();
+	const int tv_num = data["target_vertex_set"].size();
 	static std::uniform_int_distribution<> truck_num_gen(std::max(total_truck_num - 3, 1), total_truck_num);
 
 	for(int i = 1; i <= tv_num; ++i) idx[i] = i;
@@ -16,6 +16,7 @@ std::vector<Individual> IndividualInit(std::size_t num) {
 	for(std::size_t i = 0; i < num; ++i) {
 		Individual &now = res[i];
 		do {
+			std::fill(now.next.begin(), now.next.end(), 0);
 			std::shuffle(idx + 1, idx + tv_num + 1, rand_engine);
 			int truck_num = truck_num_gen(rand_engine);
 
