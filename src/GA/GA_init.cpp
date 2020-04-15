@@ -46,8 +46,6 @@ void GAInit() {
 		target[i] = target_vertex_set[i - 1]["target"].get<double>();
 }
 
-Individual::Individual(): next(tv_num + 1) { }
-
 static int degree[MAX_TARGET_NUM + 1];
 static double weight[MAX_TARGET_NUM];
 

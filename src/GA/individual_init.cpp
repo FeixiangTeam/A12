@@ -17,7 +17,7 @@ std::vector<Individual> IndividualInit(std::size_t num) {
 	for(std::size_t i = 0; i < num; ++i) {
 		Individual &now = res[i];
 		do {
-			std::fill(now.next.begin(), now.next.end(), 0);
+			std::fill(now.next + 1, now.next + tv_num + 1, 0);
 			std::shuffle(idx + 1, idx + tv_num + 1, rand_engine);
 			int truck_num = truck_num_gen(rand_engine);
 

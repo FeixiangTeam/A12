@@ -29,10 +29,9 @@ extern double target[MAX_TARGET_NUM + 1];
 void GAInit();
 
 struct Individual {
-	std::vector<int> next;
+	int next[MAX_TARGET_NUM + 1];
 	double fitness;
 	int truck_num;
-	Individual();
 	bool Calc();
 };
 
