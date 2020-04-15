@@ -43,6 +43,6 @@ void Select(std::vector<Individual> &dst, std::size_t num);
 
 void Cross(std::vector<Individual> &dst, const Individual &a, const Individual &b);
 
-void Mutation(std::vector<Individual> &dst, Individual x);
+void Mutation(std::vector<Individual> &dst, const Individual &x);
 
 #endif

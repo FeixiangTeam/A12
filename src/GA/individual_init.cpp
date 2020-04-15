@@ -1,5 +1,7 @@
 #include "GA/define.hpp"
 #include "data.hpp"
+#include <random>
+#include <vector>
 #include <cstddef>
 #include <algorithm>
 

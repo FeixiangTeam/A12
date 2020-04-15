@@ -12,19 +12,21 @@ void Solve() {
 	GAInit();
 	u = IndividualInit(POPULATION);
 	for(int k = 0; k < TIMES; ++k) {
-		printf("Solve Cycle %d\n", k);
 		Select(u, POPULATION);
+
 		v.clear();
 		for(std::size_t i = 0; i < u.size(); ++i)
 			for(std::size_t j = 0; j < u.size(); ++j)
 				if(i != j && Random(PR_CROSS))
 					Cross(v, u[i], u[j]);
+
 		w.clear();
 		for(Individual &x: v)
 			if(Random(PR_MUTATION))
 				Mutation(w, std::move(x));
 			else
 				w.push_back(std::move(x));
+
 		u = std::move(w);
 	}
 	Answer();
@@ -38,7 +40,6 @@ struct Task {
 		return x.weight < y.weight;
 	}
 };
-static int used[MAX_TARGET_NUM];
 
 void Answer() {
 	const int tv_num = data["target_vertex_set"].size();
@@ -64,10 +65,11 @@ void Answer() {
 		}
 	std::sort(tasks.begin(), tasks.end());
 
-	std::fill(used, used + truck_type_num, 0);
-	for(int i = 0, j = 0; i < truck_num; ++i) {
-		while(j < truck_type_num && (tasks[i].weight > trucks[j].limit || used[j] >= trucks[j].num)) ++j;
-		++used[j];
+	for(int i = 0, j = 0, used = 0; i < truck_num; ++i) {
+		if(tasks[i].weight > trucks[j].limit) {
+			++j; used = 0;
+			while(j < truck_type_num && tasks[i].weight > trucks[j].limit) ++j;
+		}
 
 		std::vector<int> path;
 		for(int p = tasks[i].begin; p; p = next[p]) path.push_back(p);
@@ -79,5 +81,8 @@ void Answer() {
 			{"truck", data["truck_set"][trucks[j].id]["name"]},
 			{"ratio", tasks[i].weight / trucks[j].limit}
 		});
+
+		++used;
+		if(used >= trucks[j].num) { ++j; used = 0; }
 	}
 }

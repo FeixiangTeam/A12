@@ -31,15 +31,13 @@ void GAInit() {
 	}
 
 	const int truck_type_num = data["truck_set"].size();
-	trucks.resize(truck_type_num);
 	for(int i = 0; i < truck_type_num; ++i) {
 		const auto &truck = data["truck_set"][i];
 		const auto &num = truck["num"];
-		Truck &t = trucks[i];
-		t.id = i;
-		if(!num.is_null()) t.num = num.get<int>();
-		else t.num = tv_num;
-		t.limit = truck["limit"].get<double>();
+		int tnum;
+		if(!num.is_null()) tnum = num.get<int>();
+		else tnum = tv_num;
+		if(tnum > 0) trucks.push_back({i, tnum, truck["limit"].get<double>()});
 	}
 	std::sort(trucks.begin(), trucks.end());
 }
@@ -48,7 +46,6 @@ Individual::Individual(): next(data["target_vertex_set"].size() + 1) { }
 
 static int degree[MAX_TARGET_NUM + 1];
 static double weight[MAX_TARGET_NUM];
-static int used[MAX_TARGET_NUM];
 
 bool Individual::Calc() {
 	const int tv_num = data["target_vertex_set"].size();
@@ -71,11 +68,14 @@ bool Individual::Calc() {
 		}
 	std::sort(weight, weight + truck_num);
 
-	std::fill(used, used + truck_type_num, 0);
-	for(int i = 0, j = 0; i < truck_num; ++i) {
-		while(j < truck_type_num && (weight[i] > trucks[j].limit || used[j] >= trucks[j].num)) ++j;
-		if(j >= truck_type_num) return false;
-		++used[j];
+	for(int i = 0, j = 0, used = 0; i < truck_num; ++i) {
+		if(weight[i] > trucks[j].limit) {
+			++j; used = 0;
+			while(j < truck_type_num && weight[i] > trucks[j].limit) ++j;
+			if(j >= truck_type_num) return false;
+		}
+		++used;
+		if(used >= trucks[j].num) { ++j; used = 0; }
 	}
 
 	double cost = BETA * truck_num;
