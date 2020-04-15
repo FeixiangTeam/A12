@@ -11,6 +11,7 @@ constexpr std::size_t MAX_VERTEX_NUM = 100;
 constexpr std::size_t MAX_TARGET_NUM = 50;
 
 extern json data;
+extern int tv_num;
 
 void DataInit(const char *input);
 

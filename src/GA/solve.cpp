@@ -42,7 +42,6 @@ struct Task {
 };
 
 void Answer() {
-	const int tv_num = data["target_vertex_set"].size();
 	const int truck_type_num = trucks.size();
 
 	const auto &next = best.next;
@@ -54,13 +53,13 @@ void Answer() {
 		if(degree[i] == 0) {
 			tasks[j].begin = i;
 			double weight = 0;
-			for(int p = i; p; p = next[p])
-				weight += data["target_vertex_set"][p - 1]["target"].get<double>();
+			for(int p = i; p; p = next[p]) weight += target[p];
 			tasks[j].weight = weight;
 			++j;
 		}
 	std::sort(tasks.begin(), tasks.end());
 
+	const auto &truck_set = data["truck_set"];
 	int used = 0;
 	for(int i = 0, j = 0; i < best.truck_num; ++i) {
 		if(tasks[i].weight > trucks[j].limit || used >= trucks[j].num) {
@@ -76,7 +75,7 @@ void Answer() {
 			{"target_path", Map::GetNamedPath(path)},
 			{"distance", Map::CalcPathDistance(path)},
 			{"weight", tasks[i].weight},
-			{"truck", data["truck_set"][trucks[j].id]["name"]},
+			{"truck", truck_set[trucks[j].id]["name"]},
 			{"ratio", tasks[i].weight / trucks[j].limit}
 		});
 	}

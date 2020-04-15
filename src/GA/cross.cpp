@@ -8,7 +8,6 @@ static bool flag[MAX_TARGET_NUM + 1];
 static int degree[MAX_TARGET_NUM + 1];
 
 void Cross(std::vector<Individual> &dst, const Individual &a, const Individual &b) {
-	const int tv_num = data["target_vertex_set"].size();
 	static std::uniform_int_distribution<> choice_gen(1, tv_num);
 	Individual res;
 	do {

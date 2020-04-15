@@ -24,6 +24,7 @@ struct Truck {
 };
 
 extern std::vector<Truck> trucks;
+extern double target[MAX_TARGET_NUM + 1];
 
 void GAInit();
 

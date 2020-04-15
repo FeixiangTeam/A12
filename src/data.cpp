@@ -8,6 +8,7 @@
 #include <iostream>
 
 json data;
+int tv_num;
 
 static std::map<std::string, int> vertex;
 static std::string name[MAX_VERTEX_NUM];
@@ -15,18 +16,27 @@ static std::string name[MAX_VERTEX_NUM];
 void DataInit(const char *input) {
 	std::ifstream fin(input);
 	fin >> data;
+
+	const auto &target_vertex_set = data["target_vertex_set"];
+	tv_num = target_vertex_set.size();
+
 	int num = 0;
-	if(vertex.emplace(data["start_vertex"], num).second)
-		name[num++] = data["start_vertex"];
-	for(std::size_t i = 0; i < data["target_vertex_set"].size(); ++i)
-		if(vertex.emplace(data["target_vertex_set"][i]["name"], num).second)
-			name[num++] = data["target_vertex_set"][i]["name"];
-	for(const auto &edge: data["edge_set"]) {
-		if(vertex.emplace(edge["from"], num).second)
-			name[num++] = edge["from"];
-		if(vertex.emplace(edge["to"], num).second)
-			name[num++] = edge["to"];
+	const auto &start_vertex = data["start_vertex"];
+	if(vertex.emplace(start_vertex, num).second)
+		name[num++] = start_vertex;
+
+	for(int i = 0; i < tv_num; ++i) {
+		const auto &tg = target_vertex_set[i]["name"];
+		if(vertex.emplace(tg, num).second) name[num++] = tg;
 	}
+
+	for(const auto &edge: data["edge_set"]) {
+		const auto &from = edge["from"];
+		const auto &to = edge["to"];
+		if(vertex.emplace(from, num).second) name[num++] = from;
+		if(vertex.emplace(to, num).second) name[num++] = to;
+	}
+
 	Map::Init();
 }
 

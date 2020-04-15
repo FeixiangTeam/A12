@@ -8,7 +8,6 @@
 int first[MAX_TARGET_NUM + 1], degree[MAX_TARGET_NUM + 1];
 
 void Mutation(std::vector<Individual> &dst, const Individual &x) {
-	const int tv_num = data["target_vertex_set"].size();
 	static std::uniform_int_distribution<> choice_gen(1, tv_num);
 
 	std::fill(degree + 1, degree + tv_num + 1, 0);

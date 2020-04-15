@@ -1,6 +1,6 @@
 #include "GA/define.hpp"
-#include <cstddef>
 #include <vector>
+#include <cstddef>
 #include <random>
 
 void Select(std::vector<Individual> &dst, std::size_t num) {

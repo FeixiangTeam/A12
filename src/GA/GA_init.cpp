@@ -14,13 +14,13 @@ int total_truck_num;
 Individual best;
 
 std::vector<Truck> trucks;
+double target[MAX_TARGET_NUM + 1];
 
 void GAInit() {
-	const int tv_num = data["target_vertex_set"].size();
-
 	best.fitness = 0;
 
-	for(const auto &truck: data["truck_set"]) {
+	const auto &truck_set = data["truck_set"];
+	for(const auto &truck: truck_set) {
 		const auto &num = truck["num"];
 		if(!num.is_null()) {
 			total_truck_num += num.get<int>();
@@ -30,9 +30,9 @@ void GAInit() {
 		}
 	}
 
-	const int truck_type_num = data["truck_set"].size();
+	const int truck_type_num = truck_set.size();
 	for(int i = 0; i < truck_type_num; ++i) {
-		const auto &truck = data["truck_set"][i];
+		const auto &truck = truck_set[i];
 		const auto &num = truck["num"];
 		int tnum;
 		if(!num.is_null()) tnum = num.get<int>();
@@ -40,15 +40,18 @@ void GAInit() {
 		if(tnum > 0) trucks.push_back({i, tnum, truck["limit"].get<double>()});
 	}
 	std::sort(trucks.begin(), trucks.end());
+
+	const auto &target_vertex_set = data["target_vertex_set"];
+	for(int i = 1; i <= tv_num; ++i)
+		target[i] = target_vertex_set[i - 1]["target"].get<double>();
 }
 
-Individual::Individual(): next(data["target_vertex_set"].size() + 1) { }
+Individual::Individual(): next(tv_num + 1) { }
 
 static int degree[MAX_TARGET_NUM + 1];
 static double weight[MAX_TARGET_NUM];
 
 bool Individual::Calc() {
-	const int tv_num = data["target_vertex_set"].size();
 	const int truck_type_num = trucks.size();
 
 	truck_num = 0;
@@ -62,8 +65,7 @@ bool Individual::Calc() {
 	for(int i = 1, j = 0; i <= tv_num; ++i)
 		if(degree[i] == 0) {
 			weight[j] = 0;
-			for(int p = i; p; p = next[p])
-				weight[j] += data["target_vertex_set"][p - 1]["target"].get<double>();
+			for(int p = i; p; p = next[p]) weight[j] += target[p];
 			++j;
 		}
 	std::sort(weight, weight + truck_num);

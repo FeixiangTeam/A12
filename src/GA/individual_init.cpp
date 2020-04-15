@@ -10,7 +10,6 @@ static double dis_of[MAX_TARGET_NUM + 1];
 static int pre[MAX_TARGET_NUM + 1];
 
 std::vector<Individual> IndividualInit(std::size_t num) {
-	const int tv_num = data["target_vertex_set"].size();
 	static std::uniform_int_distribution<> truck_num_gen(std::max(total_truck_num - 3, 1), total_truck_num);
 
 	for(int i = 1; i <= tv_num; ++i) idx[i] = i;

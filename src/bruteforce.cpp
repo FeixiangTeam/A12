@@ -23,13 +23,14 @@ struct Truck {
 	std::size_t id;
 	double limit, cost;
 	operator double() { return limit; }
+	friend bool operator<(const Truck &x, const Truck &y) {
+		return x.cost < y.cost;
+	}
 };
 std::vector<Truck> trucks;
 
 void Solve() {
-	std::size_t num = data["target_vertex_set"].size();
-
-	for(std::size_t i = 0; i < num; ++i) {
+	for(int i = 0; i < tv_num; ++i) {
 		double w = data["target_vertex_set"][i]["target"];
 		for(int j = 0; j < (1 << i); ++j)
 			weight[j | 1 << i] = weight[j] + w;
@@ -37,8 +38,8 @@ void Solve() {
 
 	std::fill(cost, cost + sizeof(cost) / sizeof(double), std::numeric_limits<double>::infinity());
 	std::fill(*path, *path + sizeof(path) / sizeof(double), std::numeric_limits<double>::infinity());
-	for(int i = 0; i < (1 << num); ++i)
-		for(std::size_t j = 0; j < num; ++j)
+	for(int i = 0; i < (1 << tv_num); ++i)
+		for(int j = 0; j < tv_num; ++j)
 			if(i & 1 << j) {
 				double g = path[i][j] + Map::dis[0][j + 1];
 				if(g < cost[i]) {
@@ -49,7 +50,7 @@ void Solve() {
 				if(i == 0)
 					path[1 << j][j] = Map::dis[j + 1][0];
 				else
-					for(std::size_t k = 0; k < num; ++k)
+					for(int k = 0; k < tv_num; ++k)
 						if(i & 1 << k) {
 							double g = path[i][k] + Map::dis[j + 1][k + 1];
 							if(g < path[i | 1 << j][j]) {
@@ -60,9 +61,11 @@ void Solve() {
 			}
 
 	const auto &truck_set = data["truck_set"];
-	for(std::size_t i = 0; i < truck_set.size(); ++i)
-		trucks.push_back({i, truck_set[i]["limit"], truck_set[i]["cost"]});
-	std::sort(trucks.begin(), trucks.end(), [](const Truck &a, const Truck &b) { return a.cost<b.cost; });
+	for(std::size_t i = 0; i < truck_set.size(); ++i) {
+		const auto &truck = truck_set[i];
+		trucks.push_back({i, truck["limit"], truck["cost"]});
+	}
+	std::sort(trucks.begin(), trucks.end());
 	std::size_t n = 0;
 	for(std::size_t i = 1; i < trucks.size(); ++i)
 		if(trucks[i].limit > trucks[n].limit)
@@ -71,7 +74,7 @@ void Solve() {
 
 	std::fill(f, f + sizeof(f) / sizeof(double), std::numeric_limits<double>::infinity());
 	f[0] = 0;
-	for(int i = 0; i < (1 << num); ++i)
+	for(int i = 0; i < (1 << tv_num); ++i)
 		for(int j = i; j > 0; j = (j - 1) & i) {
 			auto k = std::lower_bound(trucks.begin(), trucks.end(), weight[j]);
 			if(k != trucks.end()) {
@@ -83,7 +86,7 @@ void Solve() {
 			}
 		}
 
-	int i = (1 << num) - 1;
+	int i = (1 << tv_num) - 1;
 	while(i > 0) {
 		int j = p[i]; i ^= j;
 		double w = weight[j];
@@ -99,8 +102,8 @@ void Solve() {
 			{"target_path", Map::GetNamedPath(res)},
 			{"distance", Map::CalcPathDistance(res)},
 			{"weight", w},
-			{"truck", data["truck_set"][t]["name"]},
-			{"ratio", w / data["truck_set"][t]["limit"].get<double>()}
+			{"truck", truck_set[t]["name"]},
+			{"ratio", w / truck_set[t]["limit"].get<double>()}
 		});
 	}
 }
