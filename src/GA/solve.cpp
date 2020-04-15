@@ -46,14 +46,10 @@ void Answer() {
 	const int truck_type_num = trucks.size();
 
 	const auto &next = best.next;
-	int truck_num = 0;
 	std::fill(degree + 1, degree + tv_num + 1, 0);
-	for(int i = 1; i <= tv_num; ++i) {
-		if(next[i] == 0) ++truck_num;
-		else ++degree[next[i]];
-	}
+	for(int i = 1; i <= tv_num; ++i) ++degree[next[i]];
 
-	std::vector<Task> tasks(truck_num);
+	std::vector<Task> tasks(best.truck_num);
 	for(int i = 1, j = 0; i <= tv_num; ++i)
 		if(degree[i] == 0) {
 			tasks[j].begin = i;
@@ -65,11 +61,13 @@ void Answer() {
 		}
 	std::sort(tasks.begin(), tasks.end());
 
-	for(int i = 0, j = 0, used = 0; i < truck_num; ++i) {
-		if(tasks[i].weight > trucks[j].limit) {
+	int used = 0;
+	for(int i = 0, j = 0; i < best.truck_num; ++i) {
+		if(tasks[i].weight > trucks[j].limit || used >= trucks[j].num) {
 			++j; used = 0;
 			while(j < truck_type_num && tasks[i].weight > trucks[j].limit) ++j;
 		}
+		++used;
 
 		std::vector<int> path;
 		for(int p = tasks[i].begin; p; p = next[p]) path.push_back(p);
@@ -81,8 +79,5 @@ void Answer() {
 			{"truck", data["truck_set"][trucks[j].id]["name"]},
 			{"ratio", tasks[i].weight / trucks[j].limit}
 		});
-
-		++used;
-		if(used >= trucks[j].num) { ++j; used = 0; }
 	}
 }

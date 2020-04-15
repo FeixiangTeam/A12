@@ -68,14 +68,14 @@ bool Individual::Calc() {
 		}
 	std::sort(weight, weight + truck_num);
 
-	for(int i = 0, j = 0, used = 0; i < truck_num; ++i) {
-		if(weight[i] > trucks[j].limit) {
+	int used = 0;
+	for(int i = 0, j = 0; i < truck_num; ++i) {
+		if(weight[i] > trucks[j].limit || used >= trucks[j].num) {
 			++j; used = 0;
 			while(j < truck_type_num && weight[i] > trucks[j].limit) ++j;
 			if(j >= truck_type_num) return false;
 		}
 		++used;
-		if(used >= trucks[j].num) { ++j; used = 0; }
 	}
 
 	double cost = BETA * truck_num;
