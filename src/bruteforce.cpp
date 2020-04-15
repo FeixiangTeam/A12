@@ -95,7 +95,7 @@ void Solve() {
 		int k = start_by[j];
 		while(j > 0) {
 			res.push_back(k + 1);
-			std::tie(j, k)=std::tuple(j ^ (1 << k), from[j][k]);
+			std::tie(j, k)=std::make_tuple(j ^ (1 << k), from[j][k]);
 		}
 		answer.push_back({
 			{"full_path", Map::GetNamedPath(Map::GetFullPath(res))},
