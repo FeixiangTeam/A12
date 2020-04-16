@@ -79,9 +79,10 @@ bool Individual::Calc() {
 	}
 
 	double cost = BETA * truck_num;
-	for(int i = 1; i <= truck_num; ++i)
+	for(int i = 1; i <= tv_num; ++i) {
 		if(degree[i] == 0) cost += Map::dis[0][i];
-		else cost += Map::dis[i][next[i]];
+		cost += Map::dis[i][next[i]];
+	}
 	fitness = FITNESS_FACTOR / cost;
 
 	if(fitness > best.fitness) best = *this;
