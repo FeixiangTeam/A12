@@ -94,6 +94,6 @@
 		{ "from": "8", "to": "8", "dis": 0 }
 	],
 	"truck_set": [
-		{ "name": "中型车", "limit": 8, "cost": 0, "num": 5 }
+		{ "name": "medium truck", "limit": 8, "cost": 0.05, "num": 5 }
 	]
 }

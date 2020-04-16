@@ -8,10 +8,10 @@ static bool flag[MAX_TARGET_NUM + 1];
 static int degree[MAX_TARGET_NUM + 1];
 
 void Cross(std::vector<Individual> &dst, const Individual &a, const Individual &b) {
-	static std::uniform_int_distribution<> choice_gen(1, tv_num);
+	static std::uniform_int_distribution<> choice(1, tv_num);
 	Individual res;
 	do {
-		for(int p = choice_gen(rand_engine); p; p = a.next[p]) {
+		for(int p = choice(rand_engine); p; p = a.next[p]) {
 			res.next[p] = a.next[p];
 			flag[p] = true;
 		}
